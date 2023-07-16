@@ -1,0 +1,122 @@
+# Run this to set up microk8s on an Ubuntu server
+---
+- hosts: kubernetes
+  become: yes
+  vars_files:
+    - ../vars.yml
+
+  tasks:
+    - name: System Update
+      apt:
+        update_cache: true
+        force_apt_get: true
+
+    - name: Install NFS file server
+      apt:
+        name: nfs-kernel-server
+        state: present
+
+    - name: Prepare /srv/nfs
+      file:
+        state: directory
+        path: /srv/nfs
+        owner: nobody
+        group: nogroup
+        mode: '0777'
+
+    - name: Allow servers in `kubenet` vlan to mount /srv/nfs
+      lineinfile:
+        create: true
+        path: /etc/exports
+        line: /srv/nfs 172.0.0.0/24(rw,sync,no_subtree_check)
+        mode: '0644'
+
+    - name: Ensure NFS is running
+      service:
+        name: nfs-kernel-server
+        state: restarted
+        enabled: true
+
+    - name: Install chrony
+      apt:
+        name: chrony
+        state: present
+
+    - name: Ensure chrony is running
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+
+    - name: Ensure microk8s installed
+      snap:
+        name: microk8s
+        channel: 1.27/stable
+        classic: true
+        state: present
+
+    - name: Prepare /etc/kubernetes/audit
+      file:
+        state: directory
+        path: /etc/kubernetes/audit
+        group: microk8s
+        mode: '0666'
+
+    - name: Copy K8s audit policy to remote
+      copy:
+        src: ../files/k8s-audit-policy.yaml
+        dest: /etc/kubernetes/audit/policy.yaml
+        group: microk8s
+        mode: '0660'
+
+    - name: Copy remote kube-apiserver arguments
+      copy:
+        src: ../files/kube-apiserver
+        dest: /var/snap/microk8s/current/args/kube-apiserver
+        owner: root
+        group: microk8s
+        mode: '0660'
+
+    - name: Create kubeconfig folder (~/.kube)
+      shell: |
+        cd /home/{{ username }}
+        mkdir -p .kube
+        chown -R {{ username }}:{{ username }} .kube
+      become: true
+      become_user: "{{ username }}"
+
+    - name: Allow user to manage microk8s
+      shell: usermod -a -G microk8s {{ username }}
+
+    - name: Install CSI Driver for NFS
+      shell: |
+        microk8s helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+        microk8s helm repo update
+        microk8s helm upgrade csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+          --install \
+          --version v4.4.0 \
+          --namespace kube-system \
+          --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet
+
+    - name: Wait for NFS CSI Driver to be ready
+      shell: |
+        microk8s kubectl wait pod \
+          --selector app.kubernetes.io/name=csi-driver-nfs \
+          --for condition=ready \
+          --namespace kube-system
+      register: cmd_res
+      retries: 5
+      until: cmd_res.rc == 0
+
+    - name: Copy NFS StorageClass manifest
+      copy:
+        src: ../files/storageclass-nfs.yaml
+        dest: /tmp/storageclass-nfs.yaml
+
+    - name: Apply storageclass-nfs.yaml manifest
+      shell: microk8s kubectl apply -f /tmp/storageclass-nfs.yaml
+
+    - name: Snap restart microk8s
+      shell: snap restart microk8s
+
+    - meta: reset_connection

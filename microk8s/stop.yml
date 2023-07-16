@@ -1,0 +1,7 @@
+---
+- hosts: kubernetes
+  become: true
+
+  tasks:
+    - name: Snap stop microk8s
+      shell: snap stop microk8s

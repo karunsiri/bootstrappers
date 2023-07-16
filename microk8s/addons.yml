@@ -1,0 +1,7 @@
+# Run this after microk8s is installed and running
+---
+- hosts: kubernetes
+
+  tasks:
+    - name: Enable microk8s ingress addon
+      shell: microk8s enable ingress
