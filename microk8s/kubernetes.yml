@@ -1,6 +1,7 @@
 # Run this to set up microk8s on an Ubuntu server
 ---
-- hosts: kubernetes
+- name: Setting up Ubuntu host to run microk8s
+  hosts: kubernetes
   become: yes
   vars_files:
     - ../vars.yml

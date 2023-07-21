@@ -1,38 +1,38 @@
 ---
-- hosts: localhost
+- name: Provision Fedora dev machine
+  hosts: localhost
   become: true
   vars_files:
     - ../vars.yml
 
   tasks:
     - name: Add openvpn3 repo
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
         description: OpenVPN3 repo by dsommers
         baseurl: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/fedora-$releasever-$basearch/
         gpgkey: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/pubkey.gpg
 
     - name: Add docker-ce repo
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: docker-ce-stable
         description: Docker CE Stable
         baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
         gpgkey: https://download.docker.com/linux/fedora/gpg
 
     - name: Update DNF cache
-      dnf:
+      ansible.builtin.dnf:
         update_cache: true
-        state: latest
 
     - name: Ensure C development tools
-      dnf:
+      ansible.builtin.dnf:
         name:
           - git
           - '@C Development Tools and Libraries'
         state: present
 
     - name: Ensure mandatory tool installed
-      dnf:
+      ansible.builtin.dnf:
         state: present
         name:
           - bat
@@ -48,8 +48,28 @@
           - vips
           - zsh
 
+    - name: Check if sops is installed
+      ansible.builtin.command: command -v sops
+      register: sops_exe
+      ignore_errors: true
+      changed_when: sops_exe.rc == 1
+
+    - name: Download sops RPM package
+      when: sops_exe is failed
+      ansible.builtin.get_url:
+        url: https://github.com/getsops/sops/releases/download/v3.7.3/sops-3.7.3-1.x86_64.rpm
+        dest: /tmp/sops.rpm
+        mode: '0755'
+
+    - name: Ensure SOPS is installed
+      when: sops_exe is failed
+      ansible.builtin.yum:
+        name: /tmp/sops.rpm
+        state: present
+        disable_gpg_check: true
+
     - name: Ensure docker installed
-      dnf:
+      ansible.builtin.dnf:
         state: present
         name:
           - containerd.io
@@ -65,7 +85,7 @@
         mode: '0755'
 
     - name: Uninstall useless tools
-      dnf:
+      ansible.builtin.dnf:
         state: absent
         autoremove: true
         name:
@@ -81,7 +101,7 @@
           - totem
 
     - name: Clone karunsiri/dotfiles to ~/.dotfiles
-      git:
+      ansible.builtin.git:
         repo: https://github.com/karunsiri/dotfiles.git
         dest: /home/karun/.dotfiles
       failed_when: false
@@ -89,78 +109,85 @@
       become_user: "{{ username }}"
 
     - name: Whole System Upgrade
-      dnf:
+      ansible.builtin.dnf:
         name: '*'
         state: latest
 
     - name: Detect ZSH path
-      shell: which zsh
+      ansible.builtin.command: which zsh
       register: zsh_path
+      changed_when: zsh_path.rc == 1
 
     - name: Detect user id
-      shell: id -u
+      ansible.builtin.command: id -u
       register: user_id
       become: true
       become_user: "{{ username }}"
+      changed_when: user_id.rc == 1
 
     - name: Change shell to ZSH
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/passwd
         regexp: '^{{ username }}'
         line: "{{ username }}:x:{{ user_id.stdout }}:{{ user_id.stdout }}:{{ username }}:/home/{{ username }}:{{ zsh_path.stdout }}"
 
     - name: Sync dotfiles
-      become: true
-      become_user: "{{ username }}"
-      shell: |
+      ansible.builtin.shell: |
         RCRC=$HOME/.dotfiles/rcrc
         rcup
       args:
         executable: "{{ zsh_path.stdout }}"
+      become: true
+      become_user: "{{ username }}"
+      changed_when: false
 
     - name: Ensure user fonts directory
-      file:
+      ansible.builtin.file:
         path: "{{ lookup('env', 'HOME') }}/.local/share/fonts"
         state: directory
+        mode: '0755'
       become: true
       become_user: "{{ username }}"
 
     - name: Check if 'FiraCode Nerd Font' exists
-      shell: |
+      ansible.builtin.shell: |
         ls {{ lookup('env', 'HOME') }}/.local/share/fonts/FiraCodeNerdFont*
       register: fc_font
       ignore_errors: true
+      changed_when: fc_font.rc == 1
 
     - name: Download 'FiraCode Nerd Font' font if not exist
       when: fc_font is failed
-      unarchive:
+      ansible.builtin.unarchive:
         src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/FiraCode.zip
         dest: "{{ lookup('env', 'HOME') }}/.local/share/fonts/"
-        remote_src: yes
+        remote_src: true
       become: true
       become_user: "{{ username }}"
 
     - name: Check if 'VictorMono' exists
-      shell: |
+      ansible.builtin.shell: |
         ls {{ lookup('env', 'HOME') }}/.local/share/fonts/VictorMono
       register: victor_font
       ignore_errors: true
+      changed_when: victor_font.rc == 1
 
     - name: Download 'VictorMono' font if not exist
       when: victor_font is failed
-      unarchive:
+      ansible.builtin.unarchive:
         src: https://rubjo.github.io/victor-mono/VictorMonoAll.zip
         dest: /tmp
         include:
           - 'TTF/VictorMono-MediumOblique.ttf'
           - 'TTF/VictorMono-BoldOblique.ttf'
-        remote_src: yes
+        remote_src: true
       become: true
       become_user: "{{ username }}"
 
     - name: Ensure 'VictorMono' font is installed
       when: victor_font is failed
-      shell: |
+      ansible.builtin.shell: |
         cp /tmp/TTF/* {{ lookup('env', 'HOME') }}/.local/share/fonts
       become: true
       become_user: "{{ username }}"
+      changed_when: victor_font.rc == 1
