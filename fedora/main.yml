@@ -4,8 +4,48 @@
   become: true
   vars_files:
     - ../vars.yml
+  vars:
+    nofile_limit: 39693561
 
   tasks:
+
+    - name: Set soft `nofile` limits for '*'
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: soft
+        limit_item: nofile
+        value: "{{ nofile_limit }}"
+
+    - name: Set hard `nofile` limits for '*'
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: hard
+        limit_item: nofile
+        value: "{{ nofile_limit }}"
+
+    - name: Ensure pam_limits is enabled
+      ansible.builtin.lineinfile:
+        line: session required pam_limits.so
+        path: /etc/pam.d/login
+
+    - name: Set DefaultLimitNOFILE to GUI session
+      ansible.builtin.lineinfile:
+        line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
+        path: "{{ item }}"
+      loop:
+        - /etc/systemd/user.conf
+        - /etc/systemd/system.conf
+
+    - name: Set Sysctl fs.file-max to unlimited
+      ansible.builtin.lineinfile:
+        line: fs.file-max = 2097152
+        path: /etc/sysctl.conf
+
+    - name: Load sysctl config
+      ansible.builtin.command:
+        cmd: sysctl -p
+      changed_when: false
+
     - name: Add openvpn3 repo
       ansible.builtin.yum_repository:
         name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
