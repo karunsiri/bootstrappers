@@ -10,7 +10,9 @@
     - name: System Update
       apt:
         update_cache: true
-        force_apt_get: true
+        name: '*'
+        state: latest
+      changed_when: false
 
     - name: Add or modify hard nofile limits for wildcard domain
       community.general.pam_limits:
