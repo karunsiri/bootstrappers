@@ -1,5 +1,6 @@
 ---
-- hosts: kubernetes
+- name: Stop microk8s snap service
+  hosts: kubernetes
   become: true
 
   tasks:

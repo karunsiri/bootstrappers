@@ -2,7 +2,7 @@
 ---
 - name: Setting up Ubuntu host to run microk8s
   hosts: kubernetes
-  become: yes
+  become: true
   vars_files:
     - ../vars.yml
   vars:
@@ -15,6 +15,14 @@
         name: '*'
         state: latest
       changed_when: false
+
+    - name: Ensure essential packages are installed
+      apt:
+        name:
+          - chrony
+          - cron
+          - nfs-kernel-server
+        state: present
 
     - name: Set soft `nofile` limits for '*'
       community.general.pam_limits:
@@ -53,11 +61,6 @@
         cmd: sysctl -p
       changed_when: false
 
-    - name: Install NFS file server
-      apt:
-        name: nfs-kernel-server
-        state: present
-
     - name: Prepare /srv/nfs
       file:
         state: directory
@@ -78,11 +81,6 @@
         name: nfs-kernel-server
         state: restarted
         enabled: true
-
-    - name: Install chrony
-      apt:
-        name: chrony
-        state: present
 
     - name: Ensure chrony is running
       service:
@@ -113,14 +111,14 @@
 
     - name: Copy K8s audit policy to remote
       copy:
-        src: ../files/k8s-audit-policy.yaml
+        src: ./files/k8s-audit-policy.yaml
         dest: /etc/kubernetes/audit/policy.yaml
         group: microk8s
         mode: '0660'
 
     - name: Copy remote kube-apiserver arguments
       copy:
-        src: ../files/kube-apiserver
+        src: ./files/kube-apiserver
         dest: /var/snap/microk8s/current/args/kube-apiserver
         owner: root
         group: microk8s
@@ -159,11 +157,23 @@
 
     - name: Copy NFS StorageClass manifest
       copy:
-        src: ../files/storageclass-nfs.yaml
+        src: ./files/storageclass-nfs.yaml
         dest: /tmp/storageclass-nfs.yaml
 
     - name: Apply storageclass-nfs.yaml manifest
       shell: microk8s kubectl apply -f /tmp/storageclass-nfs.yaml
+
+    - name: Ensure /root/fix_nfs_perm.sh exists
+      copy:
+        src: ./files/fix_nfs_perm.sh
+        dest: /root/fix_nfs_perm.sh
+        mode: '0755'
+
+    - name: Run fix_nfs_perm.sh on boot with cron
+      cron:
+        name: Fix /srv/nfs permissions
+        special_time: reboot
+        job: /root/fix_nfs_perm.sh
 
     - name: Snap restart microk8s
       shell: snap restart microk8s

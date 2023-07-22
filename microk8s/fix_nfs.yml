@@ -1,0 +1,13 @@
+---
+- name: Fix NFS permission
+  hosts: kubernetes
+  become: true
+
+  tasks:
+
+    - name: Set NFS perms to 0777
+      ansible.builtin.file:
+        state: directory
+        path: /srv/nfs
+        recurse: true
+        mode: '0777'
