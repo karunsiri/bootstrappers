@@ -46,6 +46,36 @@
         cmd: sysctl -p
       changed_when: false
 
+    - name: Add RPMFusion - Free
+      ansible.builtin.yum_repository:
+        name: rpmfusion-free
+        description: RPM Fusion for Fedora $releasever - Free
+        metalink: https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&arch=$basearch
+        metadata_expire: 86400
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever
+
+    - name: Add RPMFusion - Free - Updates
+      ansible.builtin.yum_repository:
+        name: rpmfusion-free-updates
+        description: RPM Fusion for Fedora $releasever - Free - Updates
+        metalink: https://mirrors.rpmfusion.org/metalink?repo=free-fedora-updates-released-$releasever&arch=$basearch
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever
+
+    - name: Add RPMFusion - Nonfree
+      ansible.builtin.yum_repository:
+        name: rpmfusion-nonfree
+        description: RPM Fusion for Fedora $releasever - Nonfree
+        metalink: https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-$releasever&arch=$basearch
+        metadata_expire: 86400
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever
+
+    - name: Add RPMFusion - Nonfree - Updates
+      ansible.builtin.yum_repository:
+        name: rpmfusion-nonfree-updates
+        description: RPM Fusion for Fedora $releasever - Nonfree - Updates
+        metalink: https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-updates-released-$releasever&arch=$basearch
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever
+
     - name: Add openvpn3 repo
       ansible.builtin.yum_repository:
         name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
@@ -92,7 +122,7 @@
       ansible.builtin.command: command -v sops
       register: sops_exe
       ignore_errors: true
-      changed_when: sops_exe.rc == 1
+      changed_when: false
 
     - name: Download sops RPM package
       when: sops_exe is failed
@@ -140,11 +170,18 @@
           - rhythmbox
           - totem
 
+    - name: Check if ~/.dotfiles exists
+      ansible.builtin.stat:
+        path: ~/.dotfiles/rcrc
+      register: dotfiles
+      become: true
+      become_user: "{{ username }}"
+
     - name: Clone karunsiri/dotfiles to ~/.dotfiles
+      when: not dotfiles.stat.exists
       ansible.builtin.git:
         repo: https://github.com/karunsiri/dotfiles.git
         dest: /home/karun/.dotfiles
-      failed_when: false
       become: true
       become_user: "{{ username }}"
 
@@ -231,3 +268,14 @@
       become: true
       become_user: "{{ username }}"
       changed_when: victor_font.rc == 1
+
+    - name: Add the flathub flatpak repository remote to the user installation
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+    - name: Ensure Extension Manager is installed
+      community.general.flatpak:
+        name: com.mattjakeman.ExtensionManager
+        state: present
