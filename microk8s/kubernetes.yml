@@ -5,6 +5,8 @@
   become: yes
   vars_files:
     - ../vars.yml
+  vars:
+    nofile_limit: 39693561
 
   tasks:
     - name: System Update
@@ -14,12 +16,32 @@
         state: latest
       changed_when: false
 
-    - name: Add or modify hard nofile limits for wildcard domain
+    - name: Set soft `nofile` limits for '*'
       community.general.pam_limits:
         domain: '*'
-        limit_type: '-'
+        limit_type: soft
         limit_item: nofile
-        value: 39693561
+        value: "{{ nofile_limit }}"
+
+    - name: Set hard `nofile` limits for '*'
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: hard
+        limit_item: nofile
+        value: "{{ nofile_limit }}"
+
+    - name: Ensure pam_limits is enabled
+      lineinfile:
+        line: session required pam_limits.so
+        path: /etc/pam.d/common-session
+
+    - name: Set DefaultLimitNOFILE to GUI session
+      ansible.builtin.lineinfile:
+        line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
+        path: "{{ item }}"
+      loop:
+        - /etc/systemd/user.conf
+        - /etc/systemd/system.conf
 
     - name: Set Sysctl fs.file-max to unlimited
       lineinfile:
