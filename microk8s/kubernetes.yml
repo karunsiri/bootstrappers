@@ -12,6 +12,23 @@
         update_cache: true
         force_apt_get: true
 
+    - name: Add or modify hard nofile limits for wildcard domain
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: '-'
+        limit_item: nofile
+        value: 39693561
+
+    - name: Set Sysctl fs.file-max to unlimited
+      lineinfile:
+        line: fs.file-max = 2097152
+        path: /etc/sysctl.conf
+
+    - name: Load sysctl config
+      command:
+        cmd: sysctl -p
+      changed_when: false
+
     - name: Install NFS file server
       apt:
         name: nfs-kernel-server
