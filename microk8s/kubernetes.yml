@@ -8,14 +8,15 @@
   vars:
     nofile_limit: 39693561
 
-  tasks:
+  pre_tasks:
     - name: System Update
       apt:
         update_cache: true
         name: '*'
         state: latest
-      changed_when: false
+        cache_valid_time: 3600
 
+  tasks:
     - name: Ensure essential packages are installed
       apt:
         name:
@@ -75,11 +76,12 @@
         path: /etc/exports
         line: /srv/nfs 172.0.0.0/24(rw,sync,no_subtree_check)
         mode: '0644'
+      notify: Restart nfs-kernel-server
 
     - name: Ensure NFS is running
       service:
         name: nfs-kernel-server
-        state: restarted
+        state: started
         enabled: true
 
     - name: Ensure chrony is running
@@ -123,6 +125,7 @@
         owner: root
         group: microk8s
         mode: '0660'
+      notify: Restart microk8s
 
     - name: Create kubeconfig folder (~/.kube)
       shell: |
@@ -175,7 +178,13 @@
         special_time: reboot
         job: /root/fix_nfs_perm.sh
 
-    - name: Snap restart microk8s
-      shell: snap restart microk8s
-
     - meta: reset_connection
+
+  handlers:
+    - name: Restart microk8s
+      command: snap restart microk8s
+
+    - name: Restart nfs-kernel-server
+      service:
+        name: nfs-kernel-server
+        state: restarted
