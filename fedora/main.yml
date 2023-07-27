@@ -148,7 +148,7 @@
           - docker-ce-cli
           - docker-compose-plugin
 
-    - name: Ensure tt (typing test) is available. Absolutely required!
+    - name: Ensure tt (typing test) is available. Absolutely necessary!
       ansible.builtin.get_url:
         url: https://github.com/lemnos/tt/releases/download/v0.4.2/tt-linux
         dest: /usr/local/bin/tt
@@ -244,7 +244,7 @@
 
     - name: Check if 'VictorMono' exists
       ansible.builtin.shell: |
-        ls {{ lookup('env', 'HOME') }}/.local/share/fonts/VictorMono
+        ls {{ lookup('env', 'HOME') }}/.local/share/fonts/VictorMono*
       register: victor_font
       ignore_errors: true
       changed_when: victor_font.rc == 1
