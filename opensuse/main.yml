@@ -43,55 +43,55 @@
         update_cache: true
         state: latest
 
-    - name: Ensure multimedia codecs
-      community.general.zypper:
-        name:
-          # - libavdevice58
-          - Mesa
-          - Mesa-dri
-          - Mesa-gallium
-          - Mesa-libEGL1
-          - Mesa-libGL1
-          - Mesa-libglapi0
-          - Mesa-libva
-          - Mesa-vulkan-device-select
-          - ffmpeg-3
-          - gdk-pixbuf-loader-libheif
-          - gstreamer-plugins-bad
-          - gstreamer-plugins-libav
-          - gstreamer-plugins-ugly
-          - gstreamer-plugins-ugly-orig-addon
-          - lame
-          - libavcodec60
-          - libavfilter9
-          - libavformat60
-          - libavutil58
-          - libdvdcss2
-          - libfdk-aac2
-          - libgbm1
-          - libheif-rav1e
-          - libheif-svtenc
-          - libheif1
-          - libpostproc57
-          - libquicktime0
-          - librist4
-          - libswresample4
-          - libswscale7
-          - libvdpau_r600
-          - libvdpau_radeonsi
-          - libvlc5
-          - libvlccore9
-          - libvulkan_radeon
-          - vlc
-          - vlc-codec-gstreamer
-          - vlc-codecs
-          - vlc-lang
-          - vlc-noX
-          - vlc-qt
-          - vlc-vdpau
-        force_resolution: true
-        allow_vendor_change: true
-        state: present
+    # - name: Ensure multimedia codecs
+    #   community.general.zypper:
+    #     name:
+    #       # - libavdevice58
+    #       - Mesa
+    #       - Mesa-dri
+    #       - Mesa-gallium
+    #       - Mesa-libEGL1
+    #       - Mesa-libGL1
+    #       - Mesa-libglapi0
+    #       - Mesa-libva
+    #       - Mesa-vulkan-device-select
+    #       - ffmpeg-3
+    #       - gdk-pixbuf-loader-libheif
+    #       - gstreamer-plugins-bad
+    #       - gstreamer-plugins-libav
+    #       - gstreamer-plugins-ugly
+    #       - gstreamer-plugins-ugly-orig-addon
+    #       - lame
+    #       - libavcodec60
+    #       - libavfilter9
+    #       - libavformat60
+    #       - libavutil58
+    #       - libdvdcss2
+    #       - libfdk-aac2
+    #       - libgbm1
+    #       - libheif-rav1e
+    #       - libheif-svtenc
+    #       - libheif1
+    #       - libpostproc57
+    #       - libquicktime0
+    #       - librist4
+    #       - libswresample4
+    #       - libswscale7
+    #       - libvdpau_r600
+    #       - libvdpau_radeonsi
+    #       - libvlc5
+    #       - libvlccore9
+    #       - libvulkan_radeon
+    #       - vlc
+    #       - vlc-codec-gstreamer
+    #       - vlc-codecs
+    #       - vlc-lang
+    #       - vlc-noX
+    #       - vlc-qt
+    #       - vlc-vdpau
+    #     force_resolution: true
+    #     allow_vendor_change: true
+    #     state: present
 
     - name: Ensure ZSH
       community.general.zypper:
