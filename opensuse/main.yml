@@ -104,6 +104,10 @@
       community.general.zypper:
         name:
           - bat
+          - colord
+          - colord-color-profiles
+          - colord-kde
+          - dkms
           - flatpak
           - fzf
           - git
