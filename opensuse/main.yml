@@ -80,6 +80,13 @@
         disable_recommends: false
         state: present
 
+    - name: Ensure aesthetic packages
+      community.general.zypper:
+        name:
+          - latte-dock
+        disable_recommends: false
+        state: present
+
     - name: Ensure docker
       community.general.zypper:
         name:
