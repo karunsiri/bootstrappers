@@ -61,6 +61,7 @@
           - flatpak
           - fzf
           - git
+          - htop
           - kitty
           - libvips-devel
           - neofetch
@@ -79,6 +80,15 @@
           - vips-tools
         disable_recommends: false
         state: present
+
+    - name: Ensure gotop is install
+      ansible.builtin.unarchive:
+        src: https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.tgz
+        dest: "{{ lookup('env', 'HOME') }}/.local/bin"
+        remote_src: true
+        mode: '0755'
+      become: true
+      become_user: "{{ username }}"
 
     - name: Ensure aesthetic packages
       community.general.zypper:
