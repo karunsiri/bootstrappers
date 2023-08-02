@@ -62,6 +62,7 @@
           - fzf
           - git
           - htop
+          - kernel-devel
           - kitty
           - libvips-devel
           - neofetch
