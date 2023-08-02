@@ -75,6 +75,7 @@
           - postgresql-server
           - rcm
           - redis
+          - ruby-devel
           - thai-fonts
           - the_silver_searcher
           - tmux
