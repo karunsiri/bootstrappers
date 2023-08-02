@@ -65,6 +65,7 @@
           - kernel-devel
           - kitty
           - libvips-devel
+          - libxslt-devel
           - neofetch
           - neovim
           - opi
