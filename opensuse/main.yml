@@ -72,6 +72,7 @@
           - patterns-devel-base-devel_kernel
           - postgresql
           - postgresql-contrib
+          - postgresql-devel
           - postgresql-server
           - rcm
           - redis
