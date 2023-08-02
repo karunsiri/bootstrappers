@@ -64,6 +64,7 @@
           - htop
           - kernel-devel
           - kitty
+          - libgcrypt-devel
           - libvips-devel
           - libxslt-devel
           - neofetch
