@@ -5,7 +5,7 @@
   vars_files:
     - ../vars.yml
   vars:
-    nofile_limit: "1048576"
+    nofile_limit: "1048576" # hardcoded into the Linux kernel. Value: 1024 * 1024
 
   tasks:
     - name: Ensure Packman Repository
@@ -136,6 +136,13 @@
         url: https://github.com/lemnos/tt/releases/download/v0.4.2/tt-linux
         dest: /usr/local/bin/tt
         mode: '0755'
+
+    # A KDE settings importer/exporter
+    - name: Ensure Konsave
+      ansible.builtin.pip:
+        name: konsave
+      become: true
+      become_user: "{{ username }}"
 
     - name: Check if ~/.dotfiles exists
       ansible.builtin.stat:
