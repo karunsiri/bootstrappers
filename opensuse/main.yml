@@ -82,6 +82,7 @@
           - thai-fonts
           - the_silver_searcher
           - tmux
+          - v4l2loopback-kmp-default
           - vips-tools
         disable_recommends: false
         state: present
