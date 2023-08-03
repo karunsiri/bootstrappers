@@ -61,6 +61,14 @@
           - flatpak
           - fzf
           - git
+          - google-noto-sans-jp-fonts-full
+          - google-noto-sans-kr-fonts-full
+          - google-noto-sans-sc-fonts-full
+          - google-noto-sans-tc-fonts-full
+          - google-noto-serif-jp-fonts-full
+          - google-noto-serif-kr-fonts-full
+          - google-noto-serif-sc-fonts-full
+          - google-noto-serif-tc-fonts-full
           - htop
           - kernel-devel
           - kitty
