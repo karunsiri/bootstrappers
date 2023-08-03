@@ -271,3 +271,14 @@
         value: "{{ nofile_limit }}"
       loop:
         - "{{ username }}"
+
+    # The following ENVs are needed by OpenSSL for Rails to verify TLS properly
+    - name: Ensure $SSL_CERT_DIR
+      ansible.builtin.lineinfile:
+        path: /etc/profile
+        line: SSL_CERT_DIR=/var/lib/ca-certificates/pem
+
+    - name: Ensure $SSL_CERT_FILE
+      ansible.builtin.lineinfile:
+        path: /etc/profile
+        line: SSL_CERT_FILE=/var/lib/ca-certificates/ca-bundle.pem
