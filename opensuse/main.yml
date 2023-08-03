@@ -67,6 +67,7 @@
           - libgcrypt-devel
           - libvips-devel
           - libxslt-devel
+          - libyaml-devel
           - neofetch
           - neovim
           - opi
