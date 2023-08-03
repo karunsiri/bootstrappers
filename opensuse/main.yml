@@ -225,6 +225,7 @@
         src: https://rubjo.github.io/victor-mono/VictorMonoAll.zip
         dest: /tmp
         include:
+          - 'TTF/VictorMono-Oblique.ttf'
           - 'TTF/VictorMono-MediumOblique.ttf'
           - 'TTF/VictorMono-BoldOblique.ttf'
         remote_src: true
