@@ -118,6 +118,13 @@
           - vips
           - zsh
 
+    - name: Ensure postgresql db is initialized
+      ansible.builtin.command: /usr/bin/postgresql-setup --initdb
+      args:
+        creates: /var/lib/pgsql/data
+      become: true
+      become_user: postgres
+
     - name: Check if sops is installed
       ansible.builtin.command: command -v sops
       register: sops_exe
