@@ -106,16 +106,28 @@
         state: present
         name:
           - bat
+          - bzip2-devel
           - fzf
           - kitty
+          - libffi
+          - libffi-devel
+          - libpq-devel
+          - libyaml-devel
+          - ncurses-devel
           - neovim
+          - openssl-devel
           - postgresql
           - postgresql-server
+          - python3-tkinter
           - rcm
+          - readline-devel
           - redis
+          - sqlite-devel
           - the_silver_searcher
           - tmux
           - vips
+          - xz-devel
+          - zlib-devel
           - zsh
 
     - name: Ensure postgresql db is initialized
