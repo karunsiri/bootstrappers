@@ -6,7 +6,8 @@
   vars_files:
     - ../vars.yml
   vars:
-    nofile_limit: 39693561
+    nofile_limit: 1048576
+    vlan_subnet: "172.0.0.0/24"
 
   pre_tasks:
     - name: System Update
@@ -74,7 +75,7 @@
       lineinfile:
         create: true
         path: /etc/exports
-        line: /srv/nfs 172.0.0.0/24(rw,sync,no_subtree_check)
+        line: /srv/nfs {{ vlan_subnet }}(rw,sync,no_subtree_check)
         mode: '0644'
       notify: Restart nfs-kernel-server
 
