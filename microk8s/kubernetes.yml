@@ -156,7 +156,7 @@
           --for condition=ready \
           --namespace kube-system
       register: cmd_res
-      retries: 5
+      retries: 10
       until: cmd_res.rc == 0
 
     - name: Copy NFS StorageClass manifest
