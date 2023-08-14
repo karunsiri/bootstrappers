@@ -1,0 +1,59 @@
+# NOTE: Run this after EVERY kernel update!
+# Use this to build v42loopback-dc module specifically for droidcam
+---
+- name: Ensure Droidcam v42loopback-dc module
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Check if v42loopback_dc is loaded
+      ignore_errors: true
+      ansible.builtin.shell: |
+        set -o pipefail
+        lsmod | grep v4l2loopback_dc
+      register: v42loopback_loaded
+      changed_when: false
+
+    - name: Terminate if v42loopback_dc is loaded
+      ansible.builtin.fail:
+        msg: Please enter correct Params
+      when: "v42loopback_loaded.rc == 0"
+
+    - name: Ensure /tmp/droidcam directory
+      ansible.builtin.file:
+        path: /tmp/droidcam
+        state: directory
+        mode: '0755'
+
+    - name: Unpack droidcam
+      ansible.builtin.unarchive:
+        src: https://files.dev47apps.net/linux/droidcam_2.0.0.zip
+        dest: /tmp/droidcam
+        remote_src: true
+
+    - name: Make HD resolutions available on reboot
+      ansible.builtin.lineinfile:
+        line: options v4l2loopback_dc width={{ item.width }} height={{ item.height }}
+        path: /etc/modprobe.d/droidcam.conf
+      loop:
+        - width: 1280
+          height: 720
+        - width: 1920
+          height: 1080
+
+    - name: Set v42loopback_dc width
+      ansible.builtin.lineinfile:
+        line: "{{ item.name }}=\"{{ item.value }}\""
+        regexp: '^{{ item.name }}="\d+"'
+        path: /tmp/droidcam/install.common
+      loop:
+        - name: WIDTH
+          value: 1280
+        - name: HEIGHT
+          value: 720
+
+    - name: Built v42loopback_dc module
+      ansible.builtin.command: /tmp/droidcam/install-video
+      args:
+        chdir: /tmp/droidcam
+      changed_when: false
