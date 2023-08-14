@@ -41,6 +41,7 @@
       community.general.zypper:
         name: '*'
         update_cache: true
+        disable_recommends: false
         state: latest
 
     - name: Ensure ZSH
