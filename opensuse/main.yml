@@ -89,6 +89,8 @@
           - rcm
           - redis
           - ruby-devel
+          - sops
+          - sqlite3-devel
           - thai-fonts
           - the_silver_searcher
           - tmux
