@@ -117,6 +117,7 @@
           - neovim
           - openssl-devel
           - postgresql
+          - postgresql-contrib
           - postgresql-server
           - python3-tkinter
           - rcm
