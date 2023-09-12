@@ -105,6 +105,28 @@
       async: 120
       poll: 5
 
+    - name: Ensure microk8s uses system file limit
+      ansible.builtin.lineinfile:
+        line: ulimit -n {{ nofile_limit }} || true
+        path: /var/snap/microk8s/current/args/containerd-env
+
+    - name: Remove microk8s default file limit
+      ansible.builtin.lineinfile:
+        line: ulimit -n 65536 || true
+        path: /var/snap/microk8s/current/args/containerd-env
+        state: absent
+
+    - name: Ensure microk8s uses system memory limit
+      ansible.builtin.lineinfile:
+        line: ulimit -n 24048 || true
+        path: /var/snap/microk8s/current/args/containerd-env
+
+    - name: Remove microk8s default memory limit
+      ansible.builtin.lineinfile:
+        line: ulimit -l 16384 || true
+        path: /var/snap/microk8s/current/args/containerd-env
+        state: absent
+
     - name: Prepare /etc/kubernetes/audit
       file:
         state: directory
