@@ -105,6 +105,12 @@
       async: 120
       poll: 5
 
+    - name: Ensure additional DNS name for certs
+      ansible.builtin.lineinfile:
+        line: DNS.6 = {{ kubernetes_dns_name }}
+        path: /var/snap/microk8s/current/certs/csr.conf.template
+        insertafter: '^DNS.5'
+
     - name: Ensure microk8s uses system file limit
       ansible.builtin.lineinfile:
         line: ulimit -n {{ nofile_limit }} || true
@@ -162,6 +168,7 @@
       shell: usermod -a -G microk8s {{ username }}
 
     - name: Install CSI Driver for NFS
+      ignore_errors: true
       shell: |
         microk8s helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
         microk8s helm repo update
