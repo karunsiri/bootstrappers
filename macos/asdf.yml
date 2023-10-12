@@ -1,0 +1,27 @@
+---
+- name: Provision a fresh MacOS laptop (Intel)
+  hosts: localhost
+  vars:
+    plugins:
+      - age
+      - argocd
+      - awscli
+      - eksctl
+      - golang
+      - helm
+      - helm
+      - jq
+      - k9s
+      - kubectl
+      - kustomize
+      - lazygit
+      - nodejs
+      - ruby
+      - terraform
+      - yq
+
+  tasks:
+    - name: Ensure ASDF plugins
+      ansible.builtin.command: asdf plugin add {{ item }}
+      loop: "{{ plugins }}"
+      changed_when: false

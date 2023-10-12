@@ -7,6 +7,7 @@ My dev machine bootstrappers using [Ansible](https://github.com/ansible/ansible)
 - **ubuntu** running [microk8s](https://microk8s.io/) with audit logging enabled.
 - [Fedora](https://fedoraproject.org/) with [GNOME](https://www.gnome.org/) desktop environment.
 - [openSUSE Tumbleweed](https://www.opensuse.org/#Tumbleweed) with [KDE Plasma](https://kde.org/) desktop environment.
+- [MacOS](docs/macos.md)
 
 ## Prerequisites
 

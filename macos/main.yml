@@ -1,0 +1,100 @@
+---
+- name: Provision a fresh MacOS laptop (Intel)
+  hosts: localhost
+  vars:
+    username: karun
+    brew_packages:
+      - bat
+      - fzf
+      - libpq
+      - libyaml
+      - neovim
+      - rcm
+      - the_silver_searcher
+      - tmux
+
+  tasks:
+    - name: Ensure Homebrew packages
+      community.general.homebrew:
+        name: "{{ brew_packages }}"
+
+    - name: Link Hombrew packages
+      community.general.homebrew:
+        name: libpq
+        state: linked
+      changed_when: false
+
+    - name: Check if fzf autocomplete exists
+      ansible.builtin.stat:
+        path: ~/.fzf.zsh
+      register: fzfzsh
+
+    - name: FZF autocomplete
+      when: not fzfzsh.stat.exists
+      ansible.builtin.command:
+        cmd: /usr/local/opt/fzf/install
+
+    - name: Ensure awsume
+      community.general.pipx:
+        name: awsume
+
+    - name: Check if ~/.dotfiles exists
+      ansible.builtin.stat:
+        path: ~/.dotfiles/rcrc
+      register: dotfiles
+
+    - name: Clone dotfiles to ~/.dotfiles
+      when: not dotfiles.stat.exists
+      ansible.builtin.git:
+        repo: https://github.com/karunsiri/dotfiles.git
+        dest: ~/.dotfiles
+
+    - name: Sync dotfiles
+      ansible.builtin.shell: |
+        RCRC=$HOME/.dotfiles/rcrc
+        rcup
+      changed_when: false
+
+    - name: Ensure user fonts directory
+      ansible.builtin.file:
+        path: "/Users/{{ username }}/Library/Fonts"
+        state: directory
+        mode: '0755'
+      register: font
+
+    - name: Check if 'FiraCode Nerd Font' exists
+      ansible.builtin.shell: |
+        ls {{ font.path }}/FiraCodeNerdFont*
+      register: fc_font
+      ignore_errors: true
+      changed_when: fc_font.rc == 1
+
+    - name: Download 'FiraCode Nerd Font' font if not exist
+      when: fc_font is failed
+      ansible.builtin.unarchive:
+        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/FiraCode.zip
+        dest: "{{ font.path }}/"
+        remote_src: true
+
+    - name: Check if 'VictorMono' exists
+      ansible.builtin.shell: |
+        ls {{ font.path }}/VictorMono*
+      register: victor_font
+      ignore_errors: true
+      changed_when: victor_font.rc == 1
+
+    - name: Download 'VictorMono' font if not exist
+      when: victor_font is failed
+      ansible.builtin.unarchive:
+        src: https://rubjo.github.io/victor-mono/VictorMonoAll.zip
+        dest: /tmp
+        include:
+          - 'TTF/VictorMono-MediumOblique.ttf'
+          - 'TTF/VictorMono-BoldOblique.ttf'
+        remote_src: true
+
+    - name: Ensure 'VictorMono' font is installed
+      when: victor_font is failed
+      ansible.builtin.shell: |
+        cp /tmp/TTF/* {{ font.path }}
+      changed_when: victor_font.rc == 1
