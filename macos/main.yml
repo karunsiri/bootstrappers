@@ -9,6 +9,7 @@
       - libpq
       - libyaml
       - neovim
+      - pkg-config
       - rcm
       - the_silver_searcher
       - tmux
