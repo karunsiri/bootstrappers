@@ -91,19 +91,25 @@
         state: started
         enabled: yes
 
-    - name: Ensure core22 snap is installed
+    - name: Ensure core20 & 22 snaps are installed
       community.general.snap:
-        name: core22
+        name: "{{ item }}"
       async: 120
       poll: 5
+      loop:
+        - core20
+        - core22
 
     - name: Ensure microk8s snap is installed
       community.general.snap:
         name: microk8s
-        channel: "1.27/stable"
+        channel: "1.28/stable"
         classic: true
-      async: 120
+      async: 360
       poll: 5
+
+    - name: Allow user to manage microk8s
+      shell: usermod -a -G microk8s {{ username }}
 
     - name: Ensure additional DNS name for certs
       ansible.builtin.lineinfile:
@@ -161,11 +167,6 @@
         cd /home/{{ username }}
         mkdir -p .kube
         chown -R {{ username }}:{{ username }} .kube
-      become: true
-      become_user: "{{ username }}"
-
-    - name: Allow user to manage microk8s
-      shell: usermod -a -G microk8s {{ username }}
 
     - name: Install CSI Driver for NFS
       ignore_errors: true

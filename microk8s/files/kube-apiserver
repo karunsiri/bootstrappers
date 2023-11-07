@@ -5,22 +5,16 @@
 --client-ca-file=${SNAP_DATA}/certs/ca.crt
 --tls-cert-file=${SNAP_DATA}/certs/server.crt
 --tls-private-key-file=${SNAP_DATA}/certs/server.key
---kubelet-client-certificate=${SNAP_DATA}/certs/server.crt
---kubelet-client-key=${SNAP_DATA}/certs/server.key
+--tls-cipher-suites=TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_GCM_SHA384
+--kubelet-client-certificate=${SNAP_DATA}/certs/apiserver-kubelet-client.crt
+--kubelet-client-key=${SNAP_DATA}/certs/apiserver-kubelet-client.key
 --secure-port=16443
---token-auth-file=${SNAP_DATA}/credentials/known_tokens.csv
 --etcd-servers="unix://${SNAP_DATA}/var/kubernetes/backend/kine.sock:12379"
 --allow-privileged=true
 --service-account-issuer='https://kubernetes.default.svc'
 --service-account-signing-key-file=${SNAP_DATA}/certs/serviceaccount.key
 --event-ttl=5m
 --profiling=false
---audit-policy-file=/etc/kubernetes/audit/policy.yaml
---audit-log-path=/etc/kubernetes/audit/audit.log
---audit-log-maxage=15
---audit-log-maxsize=60
---audit-log-maxbackup=1
---audit-webhook-batch-max-wait=30s
 
 # Enable the aggregation layer
 --requestheader-client-ca-file=${SNAP_DATA}/certs/front-proxy-ca.crt
@@ -31,3 +25,14 @@
 --proxy-client-cert-file=${SNAP_DATA}/certs/front-proxy-client.crt
 --proxy-client-key-file=${SNAP_DATA}/certs/front-proxy-client.key
 #~Enable the aggregation layer
+--enable-admission-plugins=EventRateLimit
+--admission-control-config-file=${SNAP_DATA}/args/admission-control-config-file.yaml
+--kubelet-certificate-authority=${SNAP_DATA}/certs/ca.crt
+--kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS,ExternalDNS,ExternalIP
+
+--audit-policy-file=/etc/kubernetes/audit/policy.yaml
+--audit-log-path=/etc/kubernetes/audit/audit.log
+--audit-log-maxage=15
+--audit-log-maxsize=60
+--audit-log-maxbackup=1
+--audit-webhook-batch-max-wait=30s
