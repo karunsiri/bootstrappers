@@ -1,0 +1,21 @@
+---
+version: 0.1.0
+addons:
+  - name: dns
+  - name: ingress
+  - name: helm
+  - name: helm3
+extraKubeAPIServerArgs:
+  # Bind address to allow NAT forward
+  --bind-address: "0.0.0.0"
+
+  # Audit log policy
+  --audit-policy-file: /etc/kubernetes/audit/policy.yaml
+  --audit-log-path: /etc/kubernetes/audit/audit.log
+  --audit-log-maxage: 15
+  --audit-log-maxsize: 60
+  --audit-log-maxbackup: 1
+  --audit-webhook-batch-max-wait: 30s
+extraKubeletArgs:
+  --cluster-domain: cluster.local
+  --cluster-dns: 10.152.183.10

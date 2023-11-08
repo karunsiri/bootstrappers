@@ -8,14 +8,15 @@
   vars:
     nofile_limit: 1073741816
     vlan_subnet: "172.0.0.0/24"
+    kubernetes_ip: "172.0.0.99"
 
-  pre_tasks:
-    - name: System Update
-      apt:
-        update_cache: true
-        name: '*'
-        state: latest
-        cache_valid_time: 3600
+  # pre_tasks:
+  #   - name: System Update
+  #     apt:
+  #       update_cache: true
+  #       name: '*'
+  #       state: latest
+  #       cache_valid_time: 3600
 
   tasks:
     - name: Ensure essential packages are installed
@@ -23,6 +24,7 @@
         name:
           - chrony
           - cron
+          - net-tools
           - nfs-kernel-server
         state: present
 
@@ -100,6 +102,21 @@
         - core20
         - core22
 
+    - name: Ensure microk8s common directory
+      ansible.builtin.file:
+        path: /var/snap/microk8s/common
+        state: directory
+        mode: '0777'
+        group: 1001
+
+    - name: Ensure microk8s launch configurations
+      ansible.builtin.copy:
+        src: ./files/launch_options.yaml
+        dest: /var/snap/microk8s/common/.microk8s.yaml
+        mode: '0777'
+        owner: root
+        group: 1001
+
     - name: Ensure microk8s snap is installed
       community.general.snap:
         name: microk8s
@@ -153,20 +170,16 @@
         group: microk8s
         mode: '0660'
 
-    - name: Copy remote kube-apiserver arguments
-      copy:
-        src: ./files/kube-apiserver
-        dest: /var/snap/microk8s/current/args/kube-apiserver
-        owner: root
-        group: microk8s
-        mode: '0660'
-      notify: Restart microk8s
-
     - name: Create kubeconfig folder (~/.kube)
       shell: |
         cd /home/{{ username }}
         mkdir -p .kube
         chown -R {{ username }}:{{ username }} .kube
+
+    - name: Ensure microk8s is running
+      shell: |
+        microk8s start
+        microk8s status --wait-ready
 
     - name: Install CSI Driver for NFS
       ignore_errors: true
@@ -213,7 +226,9 @@
 
   handlers:
     - name: Restart microk8s
-      command: snap restart microk8s
+      shell: |
+        snap restart microk8s
+        microk8s status --wait-ready
 
     - name: Restart nfs-kernel-server
       service:
