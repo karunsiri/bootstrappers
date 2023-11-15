@@ -55,6 +55,14 @@
         - /etc/systemd/user.conf
         - /etc/systemd/system.conf
 
+    - name: Set default timeout & abort sec
+      ansible.builtin.lineinfile:
+        line: "{{ item }}"
+        path: /etc/systemd/system.conf
+      loop:
+        - DefaultTimeoutStopSec=90s
+        - DefaultTimeoutAbortSec=90s
+
     - name: Set Sysctl fs.file-max to unlimited
       lineinfile:
         line: fs.file-max = 2097152
