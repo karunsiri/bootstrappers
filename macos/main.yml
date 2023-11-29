@@ -6,6 +6,7 @@
     brew_packages:
       - bat
       - fzf
+      - gnupg
       - libpq
       - libyaml
       - neovim
