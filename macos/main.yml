@@ -16,9 +16,14 @@
       - tmux
 
   tasks:
+    - name: Disable hold to accent key
+      ansible.builtin.command:
+        cmd: defaults write -g ApplePressAndHoldEnabled -bool false
+
     - name: Ensure Homebrew packages
       community.general.homebrew:
-        name: "{{ brew_packages }}"
+        name: "{{ item }}"
+      loop: "{{ brew_packages }}"
 
     - name: Link Hombrew packages
       community.general.homebrew:
@@ -34,7 +39,7 @@
     - name: FZF autocomplete
       when: not fzfzsh.stat.exists
       ansible.builtin.command:
-        cmd: /usr/local/opt/fzf/install
+        cmd: /opt/homebrew/opt/fzf/install
 
     - name: Ensure awsume
       community.general.pipx:
