@@ -6,6 +6,7 @@
     - ../vars.yml
   vars:
     nofile_limit: 1048576
+    ksops_version: "4.3.0"
 
   tasks:
 
@@ -168,6 +169,24 @@
         name: /tmp/sops.rpm
         state: present
         disable_gpg_check: true
+
+    - name: Ensure kustomize ksops directory
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'XDG_CONFIG_HOME') }}/kustomize/plugin/verumex.com/v1/ksops"
+        state: directory
+        mode: '0755'
+      become: true
+      become_user: "{{ username }}"
+      register: ksops_dir
+
+    - name: Ensure ksops is installed
+      ansible.builtin.unarchive:
+        src: https://github.com/viaduct-ai/kustomize-sops/releases/download/v{{ ksops_version }}/ksops_{{ ksops_version }}_Linux_x86_64.tar.gz
+        dest: "{{ ksops_dir.path }}"
+        remote_src: true
+        mode: '0755'
+      become: true
+      become_user: "{{ username }}"
 
     - name: Ensure docker installed
       ansible.builtin.dnf:

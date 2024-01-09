@@ -6,6 +6,7 @@
     - ../vars.yml
   vars:
     nofile_limit: "1048576" # hardcoded into the Linux kernel. Value: 1024 * 1024
+    ksops_version: "4.3.0"
 
   tasks:
     - name: Ensure Packman Repository
@@ -108,10 +109,19 @@
       become: true
       become_user: "{{ username }}"
 
+    - name: Ensure kustomize ksops directory
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'XDG_CONFIG_HOME') }}/kustomize/plugin/verumex.com/v1/ksops"
+        state: directory
+        mode: '0755'
+      become: true
+      become_user: "{{ username }}"
+      register: ksops_dir
+
     - name: Ensure ksops is installed
       ansible.builtin.unarchive:
-        src: https://github.com/viaduct-ai/kustomize-sops/releases/download/v4.2.3/ksops_4.2.3_Linux_x86_64.tar.gz
-        dest: "{{ lookup('env', 'HOME') }}/.local/bin"
+        src: https://github.com/viaduct-ai/kustomize-sops/releases/download/v{{ ksops_version }}/ksops_{{ ksops_version }}_Linux_x86_64.tar.gz
+        dest: "{{ ksops_dir.path }}"
         remote_src: true
         mode: '0755'
       become: true
