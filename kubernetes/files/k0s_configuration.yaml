@@ -1,0 +1,23 @@
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata:
+  name: k0s
+spec:
+  extensions:
+    storage:
+      create_default_storage_class: true
+      type: openebs_local_storage
+  api:
+    sans:
+      - 172.0.0.100
+    externalAddress: karunsiri.trueddns.com
+    # extraArgs:
+    #   audit-policy-file: /etc/kubernetes/audit/policy.yaml
+    #   audit-log-path: /etc/kubernetes/audit/audit.log
+    #   audit-log-maxage: 15
+    #   audit-log-maxsize: 60
+    #   audit-log-maxbackup: 1
+  storage:
+    type: etcd
+  telemetry:
+    enabled: true

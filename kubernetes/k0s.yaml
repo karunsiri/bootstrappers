@@ -1,0 +1,132 @@
+# Run this to set up microk8s on an Ubuntu server
+---
+- name: Setting up Ubuntu host to run microk8s
+  hosts: kubernetes
+  become: true
+  vars_files:
+    - ../vars.yml
+  vars:
+    nofile_limit: 1073741816
+    vlan_subnet: "172.0.0.0/24"
+    kubernetes_ip: "172.0.0.100"
+    kubernetes_domain: karunsiri.trueddns.com
+    k0s_version: v1.29.2+k0s.0
+
+  # pre_tasks:
+  #   - name: System Update
+  #     apt:
+  #       update_cache: true
+  #       name: '*'
+  #       state: latest
+  #       cache_valid_time: 3600
+
+  tasks:
+    - name: Ensure essential packages are installed
+      apt:
+        name:
+          - chrony
+          - cron
+          - net-tools
+        state: present
+
+    - name: Set soft `nofile` limits for '*'
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: soft
+        limit_item: nofile
+        value: "{{ nofile_limit }}"
+
+    - name: Set hard `nofile` limits for '*'
+      community.general.pam_limits:
+        domain: '*'
+        limit_type: hard
+        limit_item: nofile
+        value: "{{ nofile_limit }}"
+
+    - name: Ensure pam_limits is enabled
+      lineinfile:
+        line: session required pam_limits.so
+        path: /etc/pam.d/common-session
+
+    - name: Set DefaultLimitNOFILE to GUI session
+      ansible.builtin.lineinfile:
+        line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
+        path: "{{ item }}"
+      loop:
+        - /etc/systemd/user.conf
+        - /etc/systemd/system.conf
+
+    - name: Set default timeout & abort sec
+      ansible.builtin.lineinfile:
+        line: "{{ item }}"
+        path: /etc/systemd/system.conf
+      loop:
+        - DefaultTimeoutStopSec=90s
+        - DefaultTimeoutAbortSec=90s
+
+    - name: Set Sysctl fs.file-max to unlimited
+      lineinfile:
+        line: fs.file-max = 2097152
+        path: /etc/sysctl.conf
+
+    - name: Ensure kubernetes controller host name
+      lineinfile:
+        line: "{{ kubernetes_ip }}  {{ kubernetes_domain }}"
+        path: /etc/hosts
+
+    - name: Load sysctl config
+      command:
+        cmd: sysctl -p
+      changed_when: false
+
+    - name: Ensure chrony is running
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+
+    - name: Prepare /etc/kubernetes/audit
+      file:
+        state: directory
+        path: /etc/kubernetes/audit
+        # group: microk8s
+        mode: '0666'
+
+    - name: Copy K8s audit policy to remote
+      copy:
+        src: ./files/k8s-audit-policy.yaml
+        dest: /etc/kubernetes/audit/policy.yaml
+        mode: '0660'
+
+    - name: Check if k0s in installed
+      ansible.builtin.shell: command -v k0s
+      register: k0s_exe
+      ignore_errors: true
+      changed_when: false
+
+    - name: Ensure k0s
+      when: k0s_exe is failed
+      ansible.builtin.get_url:
+        url: https://get.k0s.sh
+        dest: /tmp/k0s_install.sh
+        mode: '0755'
+
+    - name: Copy k0s configuration
+      when: k0s_exe is failed
+      copy:
+        src: ./files/k0s_configuration.yaml
+        dest: /tmp/k0s_configuration.yaml
+        mode: '0660'
+
+    - name: Install k0s
+      when: k0s_exe is failed
+      environment:
+        K0S_VERSION: "{{ k0s_version }}"
+      ansible.builtin.shell: /tmp/k0s_install.sh
+
+    - name: Install k0s controller service
+      when: k0s_exe is failed
+      ansible.builtin.shell: |
+        k0s install controller --single -c /tmp/k0s_configuration.yaml
+
+    - meta: reset_connection
