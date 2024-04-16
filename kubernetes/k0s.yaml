@@ -6,7 +6,7 @@
   vars_files:
     - ../vars.yml
   vars:
-    nofile_limit: 1073741816
+    nofile_limit: 1048576
     vlan_subnet: "172.0.0.0/24"
     kubernetes_ip: "172.0.0.100"
     kubernetes_domain: karunsiri.trueddns.com
