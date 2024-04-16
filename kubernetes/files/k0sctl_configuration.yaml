@@ -1,0 +1,32 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s_cluster
+spec:
+  hosts:
+    - role: single
+      localhost:
+        enabled: true
+      installFlags:
+        - --disable-components metrics-server
+
+  k0s:
+    version: v1.29.3+k0s.0
+    config:
+      apiVersion: k0s.k0sproject.io/v1beta1
+      kind: ClusterConfig
+      metadata:
+        name: node1
+      spec:
+        extensions:
+          storage:
+            create_default_storage_class: true
+            type: openebs_local_storage
+        api:
+          sans:
+            - 172.0.0.100
+          externalAddress: karunsiri.trueddns.com
+        storage:
+          type: etcd
+        telemetry:
+          enabled: true
