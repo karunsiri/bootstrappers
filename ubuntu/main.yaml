@@ -70,8 +70,11 @@
 
     - name: Set Sysctl fs.file-max to unlimited
       lineinfile:
-        line: fs.file-max = 2097152
+        line: "{{ item }}"
         path: /etc/sysctl.conf
+      loop:
+        - fs.file-max = 2097152
+        - fs.inotify.max_user_instances = 2097152
 
     - name: Load sysctl config
       command:
