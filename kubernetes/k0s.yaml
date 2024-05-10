@@ -1,6 +1,6 @@
 # Run this to set up microk8s on an Ubuntu server
 ---
-- name: Setting up Ubuntu host to run microk8s
+- name: Setting up Ubuntu host to run k0s
   hosts: kubernetes
   become: true
   vars_files:
