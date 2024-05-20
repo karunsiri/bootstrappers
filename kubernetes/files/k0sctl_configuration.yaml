@@ -7,8 +7,6 @@ spec:
     - role: single
       localhost:
         enabled: true
-      installFlags:
-        - --disable-components metrics-server
 
   k0s:
     version: v1.29.3+k0s.0
