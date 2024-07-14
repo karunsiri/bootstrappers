@@ -6,7 +6,9 @@
     - ../vars.yml
   vars:
     nofile_limit: 1048576
-    ksops_version: "4.3.0"
+    ksops_version: "4.3.2"
+    sops_version: "3.9.0"
+    gotop_version: "4.2.0"
 
   tasks:
 
@@ -77,12 +79,12 @@
         metalink: https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-updates-released-$releasever&arch=$basearch
         gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever
 
-    - name: Add openvpn3 repo
-      ansible.builtin.yum_repository:
-        name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
-        description: OpenVPN3 repo by dsommers
-        baseurl: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/fedora-$releasever-$basearch/
-        gpgkey: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/pubkey.gpg
+    # - name: Add openvpn3 repo
+    #   ansible.builtin.yum_repository:
+    #     name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
+    #     description: OpenVPN3 repo by dsommers
+    #     baseurl: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/fedora-$releasever-$basearch/
+    #     gpgkey: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/pubkey.gpg
 
     - name: Add docker-ce repo
       ansible.builtin.yum_repository:
@@ -143,7 +145,7 @@
 
     - name: Ensure gotop is install
       ansible.builtin.unarchive:
-        src: https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.tgz
+        src: https://github.com/xxxserxxx/gotop/releases/download/v{{ gotop_version }}/gotop_v{{ gotop_version }}_linux_amd64.tgz
         dest: "{{ lookup('env', 'HOME') }}/.local/bin"
         remote_src: true
         mode: '0755'
@@ -159,7 +161,7 @@
     - name: Download sops RPM package
       when: sops_exe is failed
       ansible.builtin.get_url:
-        url: https://github.com/getsops/sops/releases/download/v3.7.3/sops-3.7.3-1.x86_64.rpm
+        url: https://github.com/getsops/sops/releases/download/v{{ sops_version }}/sops-{{ sops_version }}-1.x86_64.rpm
         dest: /tmp/sops.rpm
         mode: '0755'
 
