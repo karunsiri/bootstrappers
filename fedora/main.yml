@@ -331,3 +331,17 @@
       community.general.flatpak:
         name: com.mattjakeman.ExtensionManager
         state: present
+
+    - name: Ensure /mnt/shares directory is present
+      ansible.builtin.file:
+        path: /mnt/shares
+        state: directory
+        mode: '0755'
+
+    - name: Copy mount_shares script to $HOME
+      ansible.builtin.copy:
+        src: ../files/mount_shares.sh
+        dest: "{{ lookup('env', 'HOME') }}/mount_shares.sh"
+        mode: '0755'
+      become: true
+      become_user: "{{ username }}"
