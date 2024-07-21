@@ -180,6 +180,7 @@
     - name: Ensure Konsave
       ansible.builtin.pip:
         name: konsave
+        extra_args: --user
       become: true
       become_user: "{{ username }}"
 
