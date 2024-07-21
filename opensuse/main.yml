@@ -284,13 +284,14 @@
         state: present
         flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    # - name: Set DefaultLimitNOFILE to GUI session
-    #   ansible.builtin.lineinfile:
-    #     line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
-    #     path: "{{ item }}"
-    #   loop:
-    #     - /etc/systemd/system.conf
-    #     - /etc/systemd/user.conf
+    - name: Set DefaultLimitNOFILE to GUI session
+      ansible.builtin.lineinfile:
+        line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
+        path: "{{ item }}"
+        create: true
+      loop:
+        - /usr/lib/systemd/system.conf
+        - /usr/lib/systemd/user.conf
 
     - name: Set soft `nofile` limits for '*'
       community.general.pam_limits:
@@ -300,6 +301,7 @@
         value: "{{ nofile_limit }}"
       loop:
         - "{{ username }}"
+        - "*"
 
     - name: Set hard `nofile` limits for '*'
       community.general.pam_limits:
@@ -309,6 +311,21 @@
         value: "{{ nofile_limit }}"
       loop:
         - "{{ username }}"
+        - "*"
+
+    - name: Set Sysctl fs.file-max to unlimited
+      ansible.builtin.lineinfile:
+        line: "{{ item }}"
+        path: /etc/sysctl.conf
+        create: true
+      loop:
+        - "fs.file-max = {{ nofile_limit }}"
+        - "fs.inotify.max_user_instances = {{ nofile_limit }}"
+
+    - name: Load sysctl config
+      ansible.builtin.command:
+        cmd: sysctl -p
+      changed_when: false
 
     # The following ENVs are needed by OpenSSL for Rails to verify TLS properly
     # - name: Ensure $SSL_CERT_DIR
