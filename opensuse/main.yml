@@ -6,7 +6,8 @@
     - ../vars.yml
   vars:
     nofile_limit: "1048576" # hardcoded into the Linux kernel. Value: 1024 * 1024
-    ksops_version: "4.3.0"
+    ksops_version: "4.3.2"
+    gotop_version: "4.2.0"
 
   tasks:
     - name: Ensure Packman Repository
@@ -33,17 +34,17 @@
         repo: http://download.opensuse.org/repositories/server:database:postgresql/openSUSE_Tumbleweed/
         auto_import_keys: true
 
-    - name: Refresh all repos
-      community.general.zypper_repository:
-        repo: '*'
-        runrefresh: true
-
-    - name: System update
-      community.general.zypper:
-        name: '*'
-        update_cache: true
-        disable_recommends: false
-        state: latest
+    # - name: Refresh all repos
+    #   community.general.zypper_repository:
+    #     repo: '*'
+    #     runrefresh: true
+    #
+    # - name: System update
+    #   community.general.zypper:
+    #     name: '*'
+    #     update_cache: true
+    #     disable_recommends: false
+    #     state: latest
 
     - name: Ensure ZSH
       community.general.zypper:
@@ -56,9 +57,9 @@
       community.general.zypper:
         name:
           - bat
-          - colord
-          - colord-color-profiles
-          - colord-kde
+          # - colord
+          # - colord-color-profiles
+          # - colord-kde
           - dkms
           - flatpak
           - fzf
@@ -102,7 +103,7 @@
 
     - name: Ensure gotop is install
       ansible.builtin.unarchive:
-        src: https://github.com/xxxserxxx/gotop/releases/download/v4.2.0/gotop_v4.2.0_linux_amd64.tgz
+        src: https://github.com/xxxserxxx/gotop/releases/download/v{{ gotop_version }}/gotop_v{{ gotop_version }}_linux_amd64.tgz
         dest: "{{ lookup('env', 'HOME') }}/.local/bin"
         remote_src: true
         mode: '0755'
@@ -127,12 +128,13 @@
       become: true
       become_user: "{{ username }}"
 
-    - name: Ensure aesthetic packages
-      community.general.zypper:
-        name:
-          - latte-dock
-        disable_recommends: false
-        state: present
+    # Doesn't support Plasma 6.1
+    # - name: Ensure aesthetic packages
+    #   community.general.zypper:
+    #     name:
+    #       - latte-dock
+    #     disable_recommends: false
+    #     state: present
 
     - name: Ensure docker
       community.general.zypper:
@@ -276,13 +278,13 @@
         state: present
         flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    - name: Set DefaultLimitNOFILE to GUI session
-      ansible.builtin.lineinfile:
-        line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
-        path: "{{ item }}"
-      loop:
-        - /etc/systemd/system.conf
-        - /etc/systemd/user.conf
+    # - name: Set DefaultLimitNOFILE to GUI session
+    #   ansible.builtin.lineinfile:
+    #     line: DefaultLimitNOFILE=524288:{{ nofile_limit }}
+    #     path: "{{ item }}"
+    #   loop:
+    #     - /etc/systemd/system.conf
+    #     - /etc/systemd/user.conf
 
     - name: Set soft `nofile` limits for '*'
       community.general.pam_limits:
@@ -303,12 +305,12 @@
         - "{{ username }}"
 
     # The following ENVs are needed by OpenSSL for Rails to verify TLS properly
-    - name: Ensure $SSL_CERT_DIR
-      ansible.builtin.lineinfile:
-        path: /etc/profile
-        line: SSL_CERT_DIR=/var/lib/ca-certificates/pem
-
-    - name: Ensure $SSL_CERT_FILE
-      ansible.builtin.lineinfile:
-        path: /etc/profile
-        line: SSL_CERT_FILE=/var/lib/ca-certificates/ca-bundle.pem
+    # - name: Ensure $SSL_CERT_DIR
+    #   ansible.builtin.lineinfile:
+    #     path: /etc/profile
+    #     line: SSL_CERT_DIR=/var/lib/ca-certificates/pem
+    #
+    # - name: Ensure $SSL_CERT_FILE
+    #   ansible.builtin.lineinfile:
+    #     path: /etc/profile
+    #     line: SSL_CERT_FILE=/var/lib/ca-certificates/ca-bundle.pem
