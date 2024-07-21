@@ -94,7 +94,7 @@
           - postgresql-devel
           - postgresql-server
           - rcm
-          - redis
+          # - redis
           - ruby-devel
           - sops
           - sqlite3-devel
@@ -102,6 +102,7 @@
           - the_silver_searcher
           - tmux
           - v4l2loopback-kmp-default
+          - valkey
           - vips-tools
         disable_recommends: false
         state: present
@@ -156,18 +157,18 @@
         groups:
           - docker
 
-    - name: Ensure redis.conf
-      ansible.builtin.shell: |
-        cp /etc/redis/default.conf.example /etc/redis/redis.conf
-        chown redis:redis /etc/redis/redis.conf
-      args:
-        creates: /etc/redis/redis.conf
-
-    - name: Ensure redis.service
-      ansible.builtin.copy:
-        src: ./files/redis.service
-        dest: /etc/systemd/system/redis.service
-        mode: '0755'
+    # - name: Ensure redis.conf
+    #   ansible.builtin.shell: |
+    #     cp /etc/redis/default.conf.example /etc/redis/redis.conf
+    #     chown redis:redis /etc/redis/redis.conf
+    #   args:
+    #     creates: /etc/redis/redis.conf
+    #
+    # - name: Ensure redis.service
+    #   ansible.builtin.copy:
+    #     src: ./files/redis.service
+    #     dest: /etc/systemd/system/redis.service
+    #     mode: '0755'
 
     - name: Ensure tt (typing test) is available. Absolutely necessary!
       ansible.builtin.get_url:
