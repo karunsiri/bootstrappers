@@ -10,7 +10,7 @@
     vlan_subnet: "172.0.0.0/24"
     kubernetes_ip: "172.0.0.100"
     kubernetes_domain: karunsiri.trueddns.com
-    k0s_version: v1.29.2+k0s.0
+    k0s_version: v1.29.3+k0s.0
 
   # pre_tasks:
   #   - name: System Update
@@ -92,6 +92,13 @@
         # group: microk8s
         mode: '0666'
 
+    - name: Prepare k0s config directory
+      register: k0s_path
+      ansible.builtin.file:
+        state: directory
+        path: /etc/k0s
+        mode: '0666'
+
     - name: Copy K8s audit policy to remote
       copy:
         src: ./files/k8s-audit-policy.yaml
@@ -113,9 +120,10 @@
 
     - name: Copy k0s configuration
       when: k0s_exe is failed
-      copy:
+      register: k0s_conf
+      ansible.builtin.copy:
         src: ./files/k0s_configuration.yaml
-        dest: /tmp/k0s_configuration.yaml
+        dest: "{{ k0s_path.path }}/k0s_configuration.yaml"
         mode: '0660'
 
     - name: Install k0s
@@ -127,6 +135,16 @@
     - name: Install k0s controller service
       when: k0s_exe is failed
       ansible.builtin.shell: |
-        k0s install controller --single -c /tmp/k0s_configuration.yaml
+        k0s install controller -c {{ k0s_conf.dest }} --enable-worker
+
+    - name: Reload Systemctl
+      ansible.builtin.shell: |
+        systemctl daemon-reload
+
+    - name: Start k0s
+      ansible.builtin.service:
+        name: k0scontroller
+        enabled: true
+        state: started
 
     - meta: reset_connection
