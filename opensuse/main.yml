@@ -94,7 +94,6 @@
           - postgresql-devel
           - postgresql-server
           - rcm
-          # - redis
           - ruby-devel
           - sops
           - sqlite3-devel
@@ -157,18 +156,18 @@
         groups:
           - docker
 
-    # - name: Ensure redis.conf
-    #   ansible.builtin.shell: |
-    #     cp /etc/redis/default.conf.example /etc/redis/redis.conf
-    #     chown redis:redis /etc/redis/redis.conf
-    #   args:
-    #     creates: /etc/redis/redis.conf
-    #
-    # - name: Ensure redis.service
-    #   ansible.builtin.copy:
-    #     src: ./files/redis.service
-    #     dest: /etc/systemd/system/redis.service
-    #     mode: '0755'
+    - name: Ensure valkey.conf
+      ansible.builtin.shell: |
+        cp /etc/valkey/default.conf.example /etc/valkey/valkey.conf
+        chown valkey:valkey /etc/valkey/valkey.conf
+      args:
+        creates: /etc/valkey/valkey.conf
+
+    - name: Ensure valkey.service
+      ansible.builtin.copy:
+        src: ./files/valkey.service
+        dest: /etc/systemd/system/valkey.service
+        mode: '0755'
 
     - name: Ensure tt (typing test) is available. Absolutely necessary!
       ansible.builtin.get_url:
