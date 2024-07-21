@@ -23,6 +23,11 @@
         repo: http://opensuse-guide.org/repo/openSUSE_Tumbleweed/
         auto_import_keys: true
 
+    - name: Ensure server:database Repository
+      community.general.zypper_repository:
+        repo: https://download.opensuse.org/repositories/server:database/openSUSE_Tumbleweed/server:database.repo
+        state: present
+
     - name: Ensure Google public signing key
       ansible.builtin.rpm_key:
         key: https://dl.google.com/linux/linux_signing_key.pub
@@ -34,11 +39,11 @@
         repo: http://download.opensuse.org/repositories/server:database:postgresql/openSUSE_Tumbleweed/
         auto_import_keys: true
 
-    # - name: Refresh all repos
-    #   community.general.zypper_repository:
-    #     repo: '*'
-    #     runrefresh: true
-    #
+    - name: Refresh all repos
+      community.general.zypper_repository:
+        repo: '*'
+        runrefresh: true
+
     # - name: System update
     #   community.general.zypper:
     #     name: '*'
