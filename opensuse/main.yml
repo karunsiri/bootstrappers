@@ -177,12 +177,12 @@
         mode: '0755'
 
     # A KDE settings importer/exporter
-    - name: Ensure Konsave
-      ansible.builtin.pip:
-        name: konsave
-        extra_args: --user
-      become: true
-      become_user: "{{ username }}"
+    # - name: Ensure Konsave
+    #   ansible.builtin.pip:
+    #     name: konsave
+    #     extra_args: --user
+    #   become: true
+    #   become_user: "{{ username }}"
 
     - name: Check if ~/.dotfiles exists
       ansible.builtin.stat:
