@@ -60,51 +60,52 @@
 
     - name: Ensure essential tools
       community.general.zypper:
-        name:
-          - bat
-          # - colord
-          # - colord-color-profiles
-          # - colord-kde
-          - dkms
-          - flatpak
-          - fzf
-          - git
-          - google-noto-sans-jp-fonts-full
-          - google-noto-sans-kr-fonts-full
-          - google-noto-sans-sc-fonts-full
-          - google-noto-sans-tc-fonts-full
-          - google-noto-serif-jp-fonts-full
-          - google-noto-serif-kr-fonts-full
-          - google-noto-serif-sc-fonts-full
-          - google-noto-serif-tc-fonts-full
-          - htop
-          - kernel-devel
-          - kitty
-          - libgcrypt-devel
-          - libvips-devel
-          - libxslt-devel
-          - libyaml-devel
-          - neofetch
-          - neovim
-          - opi
-          - patterns-devel-base-devel_basis
-          - patterns-devel-base-devel_kernel
-          - postgresql
-          - postgresql-contrib
-          - postgresql-devel
-          - postgresql-server
-          - rcm
-          - ruby-devel
-          - sops
-          - sqlite3-devel
-          - thai-fonts
-          - the_silver_searcher
-          - tmux
-          - v4l2loopback-kmp-default
-          - valkey
-          - vips-tools
+        name: "{{ item }}"
         disable_recommends: false
         state: present
+      loop:
+        - bat
+        # - colord
+        # - colord-color-profiles
+        # - colord-kde
+        - dkms
+        - flatpak
+        - fzf
+        - git
+        - google-noto-sans-jp-fonts-full
+        - google-noto-sans-kr-fonts-full
+        - google-noto-sans-sc-fonts-full
+        - google-noto-sans-tc-fonts-full
+        - google-noto-serif-jp-fonts-full
+        - google-noto-serif-kr-fonts-full
+        - google-noto-serif-sc-fonts-full
+        - google-noto-serif-tc-fonts-full
+        - htop
+        - kernel-devel
+        - kitty
+        - libgcrypt-devel
+        - libvips-devel
+        - libxslt-devel
+        - libyaml-devel
+        - neofetch
+        - neovim
+        - opi
+        - patterns-devel-base-devel_basis
+        - patterns-devel-base-devel_kernel
+        - postgresql
+        - postgresql-contrib
+        - postgresql-devel
+        - postgresql-server
+        - rcm
+        - ruby-devel
+        - sops
+        - sqlite3-devel
+        - thai-fonts
+        - the_silver_searcher
+        - tmux
+        - v4l2loopback-kmp-default
+        - valkey
+        - vips-tools
 
     - name: Ensure gotop is install
       ansible.builtin.unarchive:
