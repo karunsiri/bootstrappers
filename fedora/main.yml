@@ -14,27 +14,39 @@
 
     - name: Set soft `nofile` limits for '*'
       community.general.pam_limits:
-        domain: '*'
+        domain: "{{ item }}"
         limit_type: soft
         limit_item: nofile
         value: "{{ nofile_limit }}"
+      loop:
+        - '*'
+        - 'root'
+        - 'karun'
 
     - name: Set hard `nofile` limits for '*'
       community.general.pam_limits:
-        domain: '*'
+        domain: "{{ item }}"
         limit_type: hard
         limit_item: nofile
         value: "{{ nofile_limit }}"
+      loop:
+        - '*'
+        - 'root'
+        - 'karun'
 
     - name: Ensure pam_limits is enabled
       ansible.builtin.lineinfile:
         line: session required pam_limits.so
         path: /etc/pam.d/login
 
-    - name: Set Sysctl fs.file-max to unlimited
+    - name: Set Sysctl fs.* to unlimited
       ansible.builtin.lineinfile:
-        line: fs.file-max = 2097152
+        line: "{{ item }}"
         path: /etc/sysctl.conf
+        create: true
+      loop:
+        - "fs.file-max = {{ nofile_limit }}"
+        - "fs.inotify.max_user_instances = 65535"
 
     - name: Load sysctl config
       ansible.builtin.command:
@@ -70,13 +82,6 @@
         description: RPM Fusion for Fedora $releasever - Nonfree - Updates
         metalink: https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-updates-released-$releasever&arch=$basearch
         gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever
-
-    # - name: Add openvpn3 repo
-    #   ansible.builtin.yum_repository:
-    #     name: copr:copr.fedorainfracloud.org:dsommers:openvpn3
-    #     description: OpenVPN3 repo by dsommers
-    #     baseurl: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/fedora-$releasever-$basearch/
-    #     gpgkey: https://download.copr.fedorainfracloud.org/results/dsommers/openvpn3/pubkey.gpg
 
     - name: Add docker-ce repo
       ansible.builtin.yum_repository:
@@ -207,22 +212,6 @@
         dest: /usr/local/bin/tt
         mode: '0755'
 
-    - name: Uninstall useless tools
-      ansible.builtin.dnf:
-        state: absent
-        autoremove: true
-        name:
-          - '@Container management'
-          - cheese
-          - gnome-boxes
-          - gnome-maps
-          - gnome-photos
-          - gnome-tour
-          - gnome-weather
-          - mediawriter
-          - rhythmbox
-          - totem
-
     - name: Check if ~/.dotfiles exists
       ansible.builtin.stat:
         path: ~/.dotfiles/rcrc
@@ -328,10 +317,28 @@
         state: present
         flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
+    # Commen this if not using Gnome.
     - name: Ensure Extension Manager is installed
       community.general.flatpak:
         name: com.mattjakeman.ExtensionManager
         state: present
+
+    # Commen this if not using Gnome.
+    - name: Uninstall useless tools
+      ansible.builtin.dnf:
+        state: absent
+        autoremove: true
+        name:
+          - '@Container management'
+          - cheese
+          - gnome-boxes
+          - gnome-maps
+          - gnome-photos
+          - gnome-tour
+          - gnome-weather
+          - mediawriter
+          - rhythmbox
+          - totem
 
     - name: Ensure /mnt/shares directory is present
       ansible.builtin.file:
