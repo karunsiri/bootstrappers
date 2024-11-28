@@ -41,9 +41,9 @@
       ansible.builtin.command:
         cmd: /opt/homebrew/opt/fzf/install
 
-    - name: Ensure awsume
-      community.general.pipx:
-        name: awsume
+    # - name: Ensure awsume
+    #   community.general.pipx:
+    #     name: awsume
 
     - name: Check if ~/.dotfiles exists
       ansible.builtin.stat:
@@ -79,7 +79,7 @@
     - name: Download 'FiraCode Nerd Font' font if not exist
       when: fc_font is failed
       ansible.builtin.unarchive:
-        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/FiraCode.zip
+        src: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraCode.zip
         dest: "{{ font.path }}/"
         remote_src: true
 
