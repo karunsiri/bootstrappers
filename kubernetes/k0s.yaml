@@ -9,8 +9,8 @@
     nofile_limit: 1048576
     vlan_subnet: "172.0.0.0/24"
     kubernetes_ip: "172.0.0.100"
-    kubernetes_domain: karunsiri.trueddns.com
-    k0s_version: v1.29.3+k0s.0
+    kubernetes_domain: kube.karunsiri.dev
+    k0s_version: v1.30.9+k0s.0
 
   # pre_tasks:
   #   - name: System Update
@@ -146,5 +146,17 @@
         name: k0scontroller
         enabled: true
         state: started
+
+    - name: Check if cloudflared in installed
+      ansible.builtin.shell: command -v cloudflared
+      register: cloudflared_exe
+      ignore_errors: true
+      changed_when: false
+
+    - name: Ensure cloudflared
+      when: cloudflared_exe is failed
+      ansible.builtin.shell: |
+        curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb &&
+        dpkg -i cloudflared.deb
 
     - meta: reset_connection
