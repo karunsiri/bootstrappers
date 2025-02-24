@@ -10,7 +10,7 @@ spec:
   api:
     sans:
       - 172.0.0.100
-    externalAddress: kube.karunsiri.dev
+    externalAddress: k0s.karunsiri.dev
     # extraArgs:
     #   audit-policy-file: /etc/kubernetes/audit/policy.yaml
     #   audit-log-path: /etc/kubernetes/audit/audit.log

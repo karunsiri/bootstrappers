@@ -23,7 +23,7 @@ spec:
         api:
           sans:
             - 172.0.0.100
-          externalAddress: kube.karunsiri.dev
+          externalAddress: k0s.karunsiri.dev
         storage:
           type: etcd
         telemetry:

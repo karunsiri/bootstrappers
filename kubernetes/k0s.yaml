@@ -9,7 +9,7 @@
     nofile_limit: 1048576
     vlan_subnet: "172.0.0.0/24"
     kubernetes_ip: "172.0.0.100"
-    kubernetes_domain: kube.karunsiri.dev
+    kubernetes_domain: k0s.karunsiri.dev
     k0s_version: v1.30.9+k0s.0
 
   # pre_tasks:
